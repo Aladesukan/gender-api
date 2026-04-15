@@ -1,59 +1,176 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Gender Classification API (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Overview
 
-## About Laravel
+This project is a simple backend API built with Laravel that integrates with the Genderize API to classify a person's gender based on their name.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+It was developed as part of the Backend Wizards Stage 0 Assessment, focusing on API integration, data processing, and proper error handling.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Features
 
-## Learning Laravel
+1 Accepts a name as a query parameter
+2 Calls an external API (Genderize)
+3 Processes and structures the response
+4 Computes confidence level based on defined rules
+5 Handles errors and edge cases properly
+6 Returns JSON responses in a consistent format
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Endpoint
 
-## Laravel Sponsors
+Classify Name
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+GET `/api/classify?name={name}`
 
-### Premium Partners
+Example:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+/api/classify?name=john
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Success Response
 
-## Code of Conduct
+json
+{
+  "status": "success",
+  "data": {
+    "name": "john",
+    "gender": "male",
+    "probability": 0.99,
+    "sample_size": 1234,
+    "is_confident": true,
+    "processed_at": "2026-04-01T12:00:00Z"
+  }
+}
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+Error Responses
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Missing Name
 
-## License
+json
+{
+  "status": "error",
+  "message": "Missing name parameter"
+}
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+Invalid Name Type
+
+json
+{
+  "status": "error",
+  "message": "Name must be a string"
+}
+
+No Prediction Available
+
+json
+{
+  "status": "error",
+  "message": "No prediction available for the provided name"
+}
+
+Server / External API Error
+
+json
+{
+  "status": "error",
+  "message": "Something went wrong"
+}
+
+
+How It Works
+
+1. The API receives a request with a name parameter
+2. It sends a GET request to the Genderize API
+3. Extracts:
+
+   * gender
+   * probability
+   * count (renamed to sample_size)
+4. Applies confidence logic:
+
+   * `is_confident = true` if:
+
+     * probability ≥ 0.7
+     * sample_size ≥ 100
+5. Adds a timestamp (`processed_at`) in UTC format
+6. Returns a structured JSON response
+
+
+Confidence Logic
+
+is_confident = (probability >= 0.7) AND (sample_size >= 100)
+
+
+Tech Stack
+
+PHP
+Laravel
+HTTP Client (Laravel)
+External API: Genderize
+
+Live API
+
+https://gender-api-production-1077.up.railway.app
+
+Testing
+
+The API was tested using:
+
+ Browser
+ Postman
+ Laravel local server
+
+Challenges & Solutions
+
+1. API Routes Not Loading in Deployment
+
+Issue: `/api/classify` returned "Not Found" on Railway
+Solution: Mapped API routes through `web.php` to ensure proper route resolution in the deployment environment
+
+2. Deployment Failure Due to Database Configuration
+
+Issue: Laravel attempted to use SQLite database which was not available
+Solution: Switched to file-based cache and session configuration
+
+3. Port Configuration Issue
+
+Issue: Application failed to respond on Railway
+Solution: Updated server to use dynamic `$PORT` instead of hardcoded port
+
+
+Installation (Laragon)
+
+git init
+cd project-folder
+composer install
+php artisan install:api
+php artisan serve
+
+Author
+
+Aladesukan Fiyinfoluwa
+
+Contact
+
+Email: [aladesukanf@gmail.com](mailto:aladesukanf@gmail.com)
+
+Notes
+
+This project focuses on backend fundamentals including:
+
+1 API integration
+2 Data transformation
+3 Error handling
+4 Deployment troubleshooting
+
+Final Thoughts
+
+This project demonstrates the ability to:
+
+1 Build and structure APIs
+2 Integrate third-party services
+3 Debug real-world deployment issues
+4 Deliver a production-ready backend solution
