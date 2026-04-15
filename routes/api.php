@@ -9,8 +9,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Route::get('/classify', function(){
-//     return "Api is working";
-// });
+Route::get('/trial', function(){
+    return "Api is working";
+});
 
 Route::get('/classify', [ClassifyController::class, 'classify'])->name('classify');
