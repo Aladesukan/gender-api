@@ -14,13 +14,13 @@ class ClassifyController extends Controller
         if(!$name){
             return response()->json([
                 'status'=>'error',
-                'message'=>'The name parameter is required.'
+                'message'=>'Missing or empty name parameter.'
             ],400)->header('Access-Control-Allow-Origin', '*');
         }
         if(!is_string($name)){
             return response()->json([
                 'status'=>'error',
-                'message'=>'The name parameter must be a string'
+                'message'=>'name is not string.'
             ],422);
         }
         // call external api
@@ -31,7 +31,7 @@ class ClassifyController extends Controller
         if ($response->failed() || !$response->json()){
             return response()->json([
                 'status'=>'error',
-                'message'=>'Failed to fetch data from the Genderize API'
+                'message'=>'Upstream or server error'
             ],502)->header('Access-Control-Allow-Origin', '*');
         }
 
