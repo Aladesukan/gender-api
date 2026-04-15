@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\ConnectionException;
+
 
 
 class ClassifyController extends Controller
@@ -24,9 +26,18 @@ class ClassifyController extends Controller
             ],422);
         }
         // call external api
-        $response = Http::get("https://api.genderize.io", [
-            'name'=>$name
-        ]);
+       try {
+            $response = Http::get('https://api.genderize.io', [
+                'name' => $name
+            ]);
+        } 
+        catch (ConnectionException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'External service unavailable'
+            ], 502)->header('Access-Control-Allow-Origin', '*');
+        }
+
 
         if ($response->failed() || !$response->json()){
             return response()->json([
