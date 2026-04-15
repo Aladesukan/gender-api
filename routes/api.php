@@ -10,7 +10,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/trial', function(){
-    return "Api is working";
+    return response()->json(['message' => 'Api is working']);
 });
 
 Route::get('/classify', [ClassifyController::class, 'classify'])->name('classify');
