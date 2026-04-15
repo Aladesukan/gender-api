@@ -14,30 +14,18 @@ class ClassifyController extends Controller
     public function classify(Request $request){
         $name = $request->query('name');
 
-        try {
-            $validated = $request->validate([
-                'name' => ['required', 'string', 'regex:/^[a-zA-Z]+$/']
-           ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'name is not string'
-            ], 422)->header('Access-Control-Allow-Origin', '*');
-        }
-
-        $name = $validated['name'];
         if(!$name){
             return response()->json([
                 'status'=>'error',
                 'message'=>'Missing or empty name parameter.'
             ],400)->header('Access-Control-Allow-Origin', '*');
         }
-        // if(!is_string($name)){
-        //     return response()->json([
-        //         'status'=>'error',
-        //         'message'=>'name is not string.'
-        //     ],422);
-        // }
+        if(!is_string($name)){
+            return response()->json([
+                'status'=>'error',
+                'message'=>'name is not string.'
+            ],422)->header('Access-Control-Allow-Origin', '*');
+        }
         // call external api
        try {
             $response = Http::get('https://api.genderize.io', [
